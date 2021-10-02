@@ -1,0 +1,79 @@
+import 'dart:io';
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(
+          title: Center(child: Text('Zerocool App')),
+        ),
+        body: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Image.asset('assets/images/Ahmed.jpg'),
+                title: Text("Ahmed Atef"),
+                contentPadding: EdgeInsets.only(right:160),
+                trailing: Icon(Icons.verified),
+                subtitle: Text("Developer"),
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+                  TextButton(
+                    child: TextButton.icon(
+                      icon: Icon(Icons.assistant_sharp),
+                      label: Text('         Follow             '),
+                      style: TextButton.styleFrom(
+                        primary: Colors.black,
+                        backgroundColor: Colors.blue,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    child: TextButton.icon(
+                      icon: Icon(Icons.assistant_sharp),
+                      label: Text(' '),
+                      style: TextButton.styleFrom(
+                        primary: Colors.black,
+                        backgroundColor: Colors.blue,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    child: TextButton.icon(
+                      icon: Icon(Icons.wifi_tethering_error_rounded_outlined),
+                      label: Text(' '),
+                      style: TextButton.styleFrom(
+                        primary: Colors.black,
+                        backgroundColor: Colors.blue,
+                      ),
+                    ),
+                  ),
+
+
+
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
