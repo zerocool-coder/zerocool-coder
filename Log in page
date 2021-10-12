@@ -1,0 +1,65 @@
+import 'dart:io';
+import 'dart:math';
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  TextEditingController _controller= TextEditingController();
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          appBar: AppBar(
+            title: Center(child: Text('Zerocool App')),
+          ),
+          body: Center(
+            child: Column(
+              children:[
+                TextFormField(
+                controller:_controller ,
+                decoration: InputDecoration(
+                  icon: Icon(Icons.person),
+                  hintText: 'please enter your name',
+                  labelText: 'Name *',
+
+                ),
+
+
+                )
+              ,TextFormField(
+              controller:_controller ,
+              decoration: InputDecoration(
+                icon: Icon(Icons.email),
+                hintText: 'enter your email',
+                labelText: 'Email:',
+              ),
+                ),
+                Padding(padding: EdgeInsets.only(top: 20)),
+                TextButton(
+                    onPressed: null , child: Text('log in'))
+              ]
+
+                )
+
+          )
+
+
+
+    ));
+
+
+  }
+}
