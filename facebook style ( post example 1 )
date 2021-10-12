@@ -1,0 +1,140 @@
+mport 'dart:io';
+import 'dart:math';
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _isLiked = false;
+  bool _comment = false;
+  bool _share = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+            appBar: AppBar(
+              title: Center(child: Text('zer0Cool')),
+            ),
+            body: Container(
+                color: Colors.black,
+                child: ListView(children: [
+                  ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: AssetImage('assets/images/ultras .jpeg'),
+                    ),
+                    title: Text("التراس حاسبات و معلومات",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.white)),
+                    subtitle: Row(
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                              text: '17h .',
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                        Icon(Icons.public, color: Colors.white, size: 15),
+                      ],
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.more_horiz_outlined, color: Colors.white),
+                        Icon(Icons.close, color: Colors.white),
+                      ],
+                    ),
+                    contentPadding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                    dense: true,
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                          padding: EdgeInsets.only(left: 20),
+                          child: Text(
+                            'Linkedin',
+                            style: TextStyle(color: Colors.white),
+                          )),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Image.asset(
+                        'assets/images/nestle.jpeg',
+                        width: 400,
+                        height: 400,
+                        fit: BoxFit.contain,
+                      ),
+                      Divider(
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _isLiked = !_isLiked;
+                          });
+                        },
+                        icon: Icon(
+                            _isLiked
+                                ? Icons.thumb_up
+                                : Icons.thumb_up_alt_outlined,
+                            color: Colors.grey),
+                        color: _isLiked ? Colors.blue : Colors.grey,
+                      ),
+                      Text(
+                        'Like',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      Padding(padding: EdgeInsets.only(right: 40)),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _comment = !_comment;
+                          });
+                        },
+                        icon: Icon(
+                            _comment
+                                ? Icons.mode_comment
+                                : Icons.mode_comment_outlined,
+                            color: Colors.grey),
+                        color: _comment ? Colors.blue : Colors.blueGrey,
+                      ),
+                      Text(
+                        'comment',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      Padding(padding: EdgeInsets.only(right: 40)),
+                      IconButton(
+                        onPressed: (){
+                          setState(() {
+                            _share=!_share;
+                          });
+                        },
+                        icon: Icon(
+                            _share ? Icons.reply_outlined : Icons.repeat,
+                             color: Colors.grey),
+                          color: _share ? Colors.grey : Colors.blue),
+                      Text(
+                        'share',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  )
+                ]))));
+  }
+}
