@@ -1,0 +1,474 @@
+//main
+import 'package:flutter/material.dart';
+import 'package:flutter_breaking/app_router/app_router.dart';
+import 'package:flutter_breaking/presentation/screens/character_screen.dart';
+
+import 'constants/strings.dart';
+
+
+void main() {
+  runApp(BreakingBadApp(appRouter: AppRouter()));
+}
+
+class BreakingBadApp extends StatelessWidget {
+  const BreakingBadApp({Key? key, required this.appRouter}) : super(key: key);
+  final AppRouter appRouter;
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      onGenerateRoute:appRouter.generateRoute ,
+      initialRoute: 'CharacterScreen',
+      title: 'Breaking Bad series',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+    );
+  }
+}
+// This trailing comma makes auto-formatting nicer for build methods.
+
+
+
+//approuter
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_breaking/Blocs/characters_cubit.dart';
+import 'package:flutter_breaking/data/Models/characters.dart';
+import 'package:flutter_breaking/data/Repositories/characters_repository.dart';
+import 'package:flutter_breaking/data/services/characters_web_services.dart';
+import 'package:flutter_breaking/presentation/screens/character_detailsScreen.dart';
+import 'package:flutter_breaking/presentation/screens/character_screen.dart';
+// case'/' slash here represents home page
+//builder in Materialpageroute builds screens
+class AppRouter{
+  late CharacterRepository characterRepository;
+  late CharactersCubit charactersCubit;
+  AppRouter(){
+    characterRepository = CharacterRepository(CharacterWebService());
+    charactersCubit = CharactersCubit(characterRepository);
+
+  }
+  Route ?generateRoute(RouteSettings settings){
+    switch(settings.name){
+      case"/":
+      return MaterialPageRoute(
+          builder:(_) => BlocProvider(
+          create:(BuildContext context)=>
+          charactersCubit,
+            child: CharacterScreen(),
+
+      ));
+      case'CharacterDetailsScreen':
+        final character = settings.arguments as Character;
+        return MaterialPageRoute(builder:(_)=>CharacterDetailsScreen(character:character));
+    };
+
+
+  }
+
+}
+//characters state
+part of 'characters_cubit.dart';
+
+@immutable
+abstract class CharactersState {}
+
+class CharactersInitial extends CharactersState {}
+class CharactersLoaded extends CharactersState{
+  final List<Character> characters;
+
+  CharactersLoaded(this.characters);
+
+}
+//characters cubit
+import 'package:bloc/bloc.dart';
+import 'package:flutter_breaking/data/Models/characters.dart';
+import 'package:flutter_breaking/data/Repositories/characters_repository.dart';
+import 'package:meta/meta.dart';
+
+part 'characters_state.dart';
+
+class CharactersCubit extends Cubit<CharactersState> {
+  final CharacterRepository characterRepository;
+  List<Character>?characters;
+
+  CharactersCubit(this.characterRepository):super(CharactersInitial());
+  List<Character>?getAllCharacters(){
+    characterRepository.getAllCharacters().then((characters){
+    emit(CharactersLoaded(characters));
+    this.characters = characters;
+  });
+    return characters;
+;}}
+//mycolors
+import 'package:flutter/material.dart';
+class MyColors{
+
+  static const  Color myYellow=Color(0xFFFFFDE7);
+  static const  Color myGrey=Color(0xFFD6D6D6);
+  static const  Color myWhite=Color(0xFFFFFFFF);
+
+}
+//strings
+final baseUrl='https://www.breakingbadapi.com/api/';
+const characterScreen='CharacterScreen';
+const characterDetailsScreen='CharacterDetailsScreen';
+
+//characters
+class Character{
+ late int charId;
+ late String name;
+ late String nickName;
+ late String image;
+ late List<dynamic> jobs;
+ late String statusIfDeadorALive;
+ late List<dynamic> appearanceOfSeasons;
+ late String actorname;
+ late String categoryForTwoSeries;
+ late List<dynamic> betterCallSaulAppearance;
+
+  Character.fromJson(Map<String,dynamic>json){
+    charId=json["char_id"];
+    name=json["name"];
+    nickName=json["nickname"];
+    image=json["img"];
+    jobs=json['occupation'];
+    statusIfDeadorALive =json["status"];
+    appearanceOfSeasons=json["appearance"];
+    actorname =json["portrayed"];
+    categoryForTwoSeries=json["category"];
+    betterCallSaulAppearance=json["better_call_saul_appearance"];
+
+  }
+}
+//characters repository
+import 'package:flutter_breaking/data/Models/characters.dart';
+import 'package:flutter_breaking/data/services/characters_web_services.dart';
+
+class CharacterRepository{
+ final CharacterWebService characterWebService;
+
+  CharacterRepository(this.characterWebService);
+ Future<List<Character>> getAllCharacters() async {
+   final characters = await characterWebService.getAllCharacters();
+   return characters.map((character) => Character.fromJson(character)).toList();
+ }
+}
+//characters webservices
+import 'package:dio/dio.dart';
+import 'package:flutter_breaking/constants/strings.dart';
+
+class CharacterWebService {
+  late Dio dio;
+
+  CharacterWebService() {
+    BaseOptions options = BaseOptions(
+      baseUrl: baseUrl,
+      receiveDataWhenStatusError: true,
+      connectTimeout: 20 * 1000,
+      receiveTimeout: 20 * 1000, // 60 seconds
+    );
+    dio = Dio(options);
+  }
+  Future<List<dynamic>> getAllCharacters() async {
+    try {
+      Response response = await dio.get('characters');
+      print(response.data);
+      return response.data;
+    } catch (e) {
+      print(e.toString());
+      return [];
+    }
+  }
+}
+//characters detailscreen
+import 'package:flutter/material.dart';
+import 'package:flutter_breaking/data/Models/characters.dart';
+
+class CharacterDetailsScreen extends StatelessWidget {
+  final Character character;
+  const CharacterDetailsScreen({Key? key, required this.character})
+      : super(key: key);
+  buildSliverAppBar() {
+    return SliverAppBar(
+      expandedHeight: 600,
+      pinned: true,
+      stretch: true,
+      backgroundColor: Colors.grey,
+      flexibleSpace: FlexibleSpaceBar(
+        centerTitle: true,
+        title: Text(
+          character.nickName,
+          style: TextStyle(color: Colors.white),
+        ),
+        background: Hero(
+            tag: character.charId,
+            child: Image.network(character.image, fit: BoxFit.cover)),
+      ),
+    );
+  }
+
+  Widget characterInfo(String title, String value) {
+    return RichText(
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      text: TextSpan(children: [
+        TextSpan(
+          text: title,
+          style: TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+        )
+      ]),
+    );
+  }
+
+  Widget buildDivider(double endIndent) {
+    return Divider(
+        color: Colors.yellow, height: 30, endIndent: endIndent, thickness: 2);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey,
+      body: CustomScrollView(
+        slivers: [
+          buildSliverAppBar(),
+          SliverList(
+              delegate: SliverChildListDelegate([
+            Container(
+              margin: EdgeInsets.fromLTRB(14, 14, 14, 14),
+              padding: EdgeInsets.all(8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  characterInfo('Job:',character.jobs.join('/')),
+                  buildDivider(315),
+                ],
+              ),
+            )
+          ])
+              //  sliverList(delegate:
+              )
+        ],
+      ),
+    );
+  }
+}
+//character screen
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_breaking/Blocs/characters_cubit.dart';
+import 'package:flutter_breaking/constants/my_colors.dart';
+import 'package:flutter_breaking/data/Models/characters.dart';
+import 'package:flutter_breaking/presentation/widgets/character_item.dart';
+
+class CharacterScreen extends StatefulWidget {
+  const CharacterScreen({Key? key}) : super(key: key);
+
+  @override
+  State<CharacterScreen> createState() => _CharacterScreenState();
+}
+
+class _CharacterScreenState extends State<CharacterScreen> {
+  List<Character>? allCharacters;
+  List<Character>? searchForCharacters; //list for search items
+  bool _isSearch = false; // default is false as I didnt search now
+  final _searchTextController = TextEditingController();
+  Widget _buildSearchField() {
+    return TextField(
+        controller: _searchTextController,
+        cursorColor: MyColors.myYellow,
+        decoration: InputDecoration(
+          hintText: 'star search',
+          border: InputBorder.none,
+          hintStyle: TextStyle(color: Colors.grey, fontSize: 18),
+        ),
+        style: TextStyle(color: Colors.grey, fontSize: 18),
+        onChanged: (searchedChar) {
+          addSearcheditemsToSearchedList(searchedChar);
+        });
+  }
+
+  void addSearcheditemsToSearchedList(String searchCharacter) {
+    searchForCharacters = allCharacters!
+        .where((character) =>
+            character.name.toLowerCase().startsWith(searchCharacter))
+        .toList();
+    {
+      setState(() {});
+    }
+  }
+  void _clearSearch() {
+    setState(() {
+      _searchTextController.clear();
+    });
+  }
+  void _stopSearching() {
+    _clearSearch();
+    setState(() {
+      _isSearch = false;
+    });
+  }
+  void _startSearch() {
+    ModalRoute.of(context)!
+        .addLocalHistoryEntry(LocalHistoryEntry(onRemove: _stopSearching));
+    setState(() {
+      _isSearch = true;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<CharactersCubit>(context).getAllCharacters();
+  }
+
+  Widget buildBlocwidget() {
+    return BlocBuilder<CharactersCubit, CharactersState>(
+        builder: (context, state) {
+      if (state is CharactersLoaded) {
+        allCharacters = (state).characters;
+        return buildLoadedListWidgets(); // another fn made by me
+      } else {
+        return CircularProgressIndicator(
+          color: Colors.blue,
+        );
+      }
+    });
+  }
+
+  Widget buildLoadedListWidgets() {
+    return SingleChildScrollView(
+      child: Container(
+        color: MyColors.myGrey,
+        child: Column(
+          children: [
+            buildCharactersList(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildCharactersList() {
+    return GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 2 / 3,
+          crossAxisSpacing: 1,
+          mainAxisSpacing: 1,
+        ),
+        shrinkWrap: true,
+        physics: const ClampingScrollPhysics(),
+        padding: EdgeInsets.zero,
+        itemCount: _searchTextController.text.isEmpty ? allCharacters!.length: searchForCharacters!.length,
+        itemBuilder: (context, index) {
+          return CharacterItem(
+            character: _searchTextController.text.isEmpty ?allCharacters![index]:searchForCharacters![index],
+          );
+        });
+  }
+
+  Widget _buildAppBarTitle() {
+    return Text(
+      'characters',
+      style: TextStyle(color: MyColors.myGrey),
+    );
+  }
+  List<Widget> _buildAppBarActions() {
+    if (_isSearch) {
+      return [
+        IconButton(
+            onPressed: () {
+              _clearSearch() {
+                Navigator.pop(context);
+              }
+            },
+            icon: Icon(Icons.clear, color: MyColors.myGrey)),
+      ];
+    } else {
+      return [
+        IconButton(
+            onPressed: _startSearch,
+            icon: Icon(Icons.search, color: Colors.grey))
+      ];
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        title: _isSearch ? _buildSearchField(): _buildAppBarTitle(),
+      actions:_buildAppBarActions(),
+      ),
+      body: buildBlocwidget(), //a function made by me
+    );
+  }
+}
+
+
+
+//character item
+
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_breaking/constants/my_colors.dart';
+import 'package:flutter_breaking/constants/strings.dart';
+import 'package:flutter_breaking/data/Models/characters.dart';
+
+class CharacterItem extends StatelessWidget {
+  final Character character;
+  const CharacterItem({Key? key, required this.character}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsetsDirectional.fromSTEB(8, 8, 8, 8),
+      padding: EdgeInsetsDirectional.all(4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child:InkWell(
+        onTap: ()=> Navigator.pushNamed(context,characterDetailsScreen,arguments: character),
+      child: GridTile(
+        child:Hero(
+            tag: character.charId,
+        child: Container(
+          color: Colors.grey,
+          child: character.image.isNotEmpty
+              ? FadeInImage.assetNetwork(
+                  width: double.infinity,
+                  height: double.infinity,
+                  placeholder: 'assets/images/loading.gif',
+                  image: character.image,
+                  fit: BoxFit.cover)
+              : Image.asset('assets/images/placeholder.png'),
+        )),
+        footer: Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          color: Colors.black54,
+          alignment: Alignment.bottomCenter,
+          child: Text(
+            '${character.name}',
+            style: TextStyle(
+                height: 1.3,
+                fontSize: 16,
+                color: MyColors.myWhite,
+                fontWeight: FontWeight.bold),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    ));
+  }
+}
