@@ -1,5 +1,5 @@
 - 👋 Hi, I’m @zerocool-coder
-- 🌱 I’m currently learning :)
+- 🌱 I’m currently Training at Instant software solutions :)
 
 
 <!---
